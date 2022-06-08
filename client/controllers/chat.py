@@ -10,35 +10,37 @@ import threading
 
 class ChatWindow(QWidget, ChatForm):
 
-    def __init__(self, username):
+    def __init__(self, usuario):
+        #lLAMA AL CONSTRUCTOR DE LA CLASE QWidget
         super().__init__()
-
-        self.username = username
+        
+    #definimos el usuario
+        self.usuario = usuario
+    #Iniciamos la ventana
         self.setupUi(self)
-
-        self.connect()
-
+        #Nos conectamos al servidor
+        self.servidor()
+        #Al pulsar el boton se envian los mensajes
         self.sendButton.clicked.connect(self.enviarMensajes)
 
-    def connect(self):
+    def servidor(self):
         datos = ('127.0.0.1', 55555)
-        af_inet = socket.AF_INET
-        sock_stream = socket.SOCK_STREAM
 
-        self.client = socket.socket(af_inet, sock_stream)
+    #Definimos el socket
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #Nos conectamos a la dirreccion de la variable datps
         self.client.connect(datos)
-
+    #Creamos un hilo para recivir los mensajes
         receive_thread = threading.Thread(target=self.recivirMensajes)
+    #Iniciamos el hilo
         receive_thread.daemon = True
         receive_thread.start()
-        self.label.setText(f"{self.username}")
-        self.client.send(self.username.encode('utf-8'))
+    #Ponemos el nombre de usuario en el cuadro de texto
+        self.label.setText(f"{self.usuario}")
 
-    def logout(self):
-        self.login_window = LoginWindow()
-        self.login_window.show()
-        self.client.close()
-        self.close()
+    #Enviamos el nombre de usaurio
+        self.client.send(self.usuario.encode('utf-8'))
+
 
     def recivirMensajes(self):
         while True:
@@ -57,7 +59,7 @@ class ChatWindow(QWidget, ChatForm):
         # cogemos los mensajes escritos en el cuadro de texto
         mensaje = self.messageLineEdit.text()
         # añadimos nustro normbre al mensaje
-        mensaje = f"{self.username}: {mensaje}"
+        mensaje = f"{self.usuario}: {mensaje}"
         # enviamos el mensaje
         self.client.send(mensaje.encode('utf-8'))
         # añadimos los mensajes escritos al cuadro de texto
